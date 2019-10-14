@@ -1,5 +1,9 @@
+/*
+ * dc1 driver
+ * Author: HoGC 
+ */
 #include "os_type.h"
-#include "driver/dc1_switch.h"
+#include "driver/dc1.h"
 #include "driver/i2c_master.h"
 
 //#define DC1_DEBUG_I2C
@@ -19,6 +23,8 @@
 #endif
 
 uint32 keyCountTime = 0;
+
+static uint16 electric_data[3] = {0};
 
 static os_timer_t OS_DC1_key;
 
@@ -115,8 +121,6 @@ u8 ICACHE_FLASH_ATTR dc1_read_reg(uint8_t reg_addr)
     return temp;
 }
 
-
-//GPIO16初始化(总开关)
 void ICACHE_FLASH_ATTR gpio16InputConf(void) {
 	WRITE_PERI_REG(PAD_XPD_DCDC_CONF,
 			(READ_PERI_REG(PAD_XPD_DCDC_CONF) & 0xffffffbc) | (uint32)0x1); // mux configuration for XPD_DCDC and rtc_gpio0 connection
@@ -128,13 +132,11 @@ void ICACHE_FLASH_ATTR gpio16InputConf(void) {
 			READ_PERI_REG(RTC_GPIO_ENABLE) & (uint32)0xfffffffe);//out disable
 }
 
-//读取GPIO16状态(总开关)
 uint8 ICACHE_FLASH_ATTR gpio16InputGet(void) {
 	return (uint8) (READ_PERI_REG(RTC_GPIO_IN_DATA) & 1);
 }
 
-//读取开关状态
-uint8_t ICACHE_FLASH_ATTR dc1_read_gpio(void){
+uint8_t ICACHE_FLASH_ATTR dc1_read_gpio(){
     uint8_t read_count = 10;
     uint8_t gpio_ret=0;
     while (read_count--)
@@ -149,7 +151,6 @@ uint8_t ICACHE_FLASH_ATTR dc1_read_gpio(void){
     return 0xF8;
 }
 
-//设置GPIO状态
 bool ICACHE_FLASH_ATTR dc1_write_gpio(uint8_t gpio_data){
     uint8_t write_count = 10;
     uint8_t gpio_ret;
@@ -172,17 +173,14 @@ bool ICACHE_FLASH_ATTR dc1_write_gpio(uint8_t gpio_data){
     return 0;
 }
 
-//设置WIFI信号灯
 void ICACHE_FLASH_ATTR wifi_led_switch(bool bit_value){
     GPIO_OUTPUT_SET(GPIO_ID_PIN(0), ~bit_value);
 }
 
-//设置logo灯
 void ICACHE_FLASH_ATTR logo_led_switch(bool bit_value){
     GPIO_OUTPUT_SET(GPIO_ID_PIN(14), ~bit_value);
 }
 
-//取反开关状态
 void ICACHE_FLASH_ATTR reverse_switch(uint16_t switch_ret,uint8_t num){
 
     uint16_t switch_bit=0x10;
@@ -204,7 +202,6 @@ void ICACHE_FLASH_ATTR reverse_switch(uint16_t switch_ret,uint8_t num){
     } 
 }
 
-//设置开关状态
 u8 ICACHE_FLASH_ATTR set_switch(uint8_t num, bool bit_value){
 
     uint8_t set_count = 2;
@@ -257,7 +254,7 @@ u8 ICACHE_FLASH_ATTR set_switch(uint8_t num, bool bit_value){
 }
 
 
-//按键检测
+
 void ICACHE_FLASH_ATTR DC1KeyHandle() {
     uint8_t read_count = 0;
 	static uint8_t Key_Check = 0;
@@ -379,7 +376,46 @@ void ICACHE_FLASH_ATTR DC1KeyHandle() {
 	return;
 }
 
-//初始化
+/**
+ * 串口回调
+ */
+void dc1_uart_data_handler(u8* data,u16 data_len){
+	u8 i = 0;
+	u32 coefficient = 0;
+	u32 period = 0;
+	u16 checkpack = 0;
+	if (data[1] == 0x5A)
+	{
+		for(i=2;i<23;i++)
+			checkpack += data[i];
+		checkpack &= 0xFF;
+		if (checkpack == data[23])
+		{
+			for (i = 0; i < 3; i++)
+			{
+				coefficient = data[2+6*i];
+				coefficient <<= 8;
+				coefficient |= data[3+6*i];
+				coefficient <<= 8;
+				coefficient |= data[4+6*i];
+				period = data[5+6*i];
+				period <<= 8;
+				period |= data[6]+6*i;
+				period <<= 8;
+				period |= data[7+6*i];
+				electric_data[i] = (coefficient*10)/period;
+			}
+		}
+	}
+}
+
+void ICACHE_FLASH_ATTR get_electric_data(uint16_t *recv_data){
+    uint8_t i = 0;
+    for(i = 0; i < 3; i++)
+        *(recv_data+i) = electric_data[i];
+}
+
+
 void ICACHE_FLASH_ATTR dc1_init(dc1_skey_function k0shortpress, dc1_lkey_function k0longpress,
                                 dc1_skey_function k1shortpress, dc1_lkey_function k1longpress, 
                                 dc1_skey_function k2shortpress, dc1_lkey_function k2longpress, 

@@ -32,4 +32,6 @@
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/types.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/machine/types.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/stdio.h \
- ../include/driver/dc1_switch.h ../include/user_esp_platform.h
+ ../include/driver/uart.h ../include/driver/uart_register.h \
+ ../../include/eagle_soc.h ../include/driver/wifi.h \
+ ../include/driver/dc1.h ../include/user_esp_platform.h

@@ -1,7 +1,8 @@
-.output/eagle/debug/obj/dc1_switch.o .output/eagle/debug/obj/dc1_switch.d : dc1_switch.c ../../include/os_type.h \
+.output/eagle/debug/obj/wifi.o .output/eagle/debug/obj/wifi.d : wifi.c ../../include/user_interface.h ../../include/os_type.h \
  ../../include/ets_sys.h ../../include/c_types.h \
- ../../include/eagle_soc.h ../include/driver/dc1_switch.h \
- ../../include/c_types.h ../../include/ets_sys.h ../../include/osapi.h \
+ ../../include/eagle_soc.h ../../include/ip_addr.h ../../include/queue.h \
+ ../include/user_config.h ../../include/spi_flash.h ../../include/gpio.h \
+ ../../include/osapi.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/_ansi.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/newlib.h \
@@ -18,5 +19,6 @@
  /opt/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stddef.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/cdefs.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h \
- ../include/user_config.h ../../include/gpio.h \
- ../include/driver/i2c_master.h
+ ../../include/espconn.h ../../include/os_type.h ../../include/mem.h \
+ ../../include/smartconfig.h ../../include/airkiss.h \
+ ../include/driver/wifi.h ../../include/ets_sys.h

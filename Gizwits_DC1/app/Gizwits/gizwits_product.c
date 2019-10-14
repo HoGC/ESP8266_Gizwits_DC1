@@ -16,31 +16,13 @@
 #include <stdio.h>
 #include <string.h>
 #include "gizwits_product.h"
-#include "driver/dc1_switch.h"
-#include "driver/ota.h"
+#include "driver/dc1.h"
 /** User area The current device state structure */
 dataPoint_t currentDataPoint;
 
 /**@name Gizwits User Interface
 * @{
 */
-
-
-/**
- * 	ota升级回调
- */
-void ICACHE_FLASH_ATTR ota_finished_callback(void * arg) {
-	struct upgrade_server_info *update = arg;
-    char ret_data[2] = {0xFA};
-	if (update->upgrade_flag == true) {
-		os_printf("rebooting!\n");
-		system_upgrade_reboot();
-	} else {
-        os_printf("ota_failure!\n");
-        ret_data[1] = 0xFF;
-		gizwitsPassthroughData(ret_data,2);
-	}
-}
 
 /**
 * @brief Event handling interface
@@ -132,6 +114,8 @@ int8_t ICACHE_FLASH_ATTR gizwitsEventProcess(eventInfo_t *info, uint8_t *data, u
             }
             break;
 
+
+
         case WIFI_SOFTAP:
             break;
         case WIFI_AIRLINK:
@@ -161,18 +145,6 @@ int8_t ICACHE_FLASH_ATTR gizwitsEventProcess(eventInfo_t *info, uint8_t *data, u
             break;
         case TRANSPARENT_DATA:
             GIZWITS_LOG("TRANSPARENT_DATA \n");
-            //user handle , Fetch data from [data] , size is [len]
-            os_printf("TRANSPARENT_DATA:%s \n",data);
-
-            //data = {"url"="http://yourdomain.com:9001/ota/"}
-            char url_data[200];
-            char ret_data[2] = {0xFA,0xF0};
-            if(get_josn_str(data,"url",url_data)){
-                os_printf("ota_start\n");
-                gizwitsPassthroughData(ret_data,2);
-                ota_upgrade(url_data,ota_finished_callback);
-            }
-            
             break;
         case MODULE_INFO:
             GIZWITS_LOG("MODULE INFO ...\n");
@@ -198,10 +170,14 @@ int8_t ICACHE_FLASH_ATTR gizwitsEventProcess(eventInfo_t *info, uint8_t *data, u
 */
 void ICACHE_FLASH_ATTR userHandle(void)
 {
-    /*
 
-    */
-	 
+    uint16_t electric_data[3];  
+    get_electric_data(electric_data);
+    
+    currentDataPoint.valuevoltage = (float)electric_data[0]/10;
+    currentDataPoint.valuecurrent = (float)electric_data[1]/10;
+    currentDataPoint.valuepower = (float)electric_data[2]/10;
+
     system_os_post(USER_TASK_PRIO_2, SIG_UPGRADE_DATA, 0);
 }
 
@@ -219,12 +195,15 @@ void ICACHE_FLASH_ATTR userInit(void)
     gizMemset((uint8_t *)&currentDataPoint, 0, sizeof(dataPoint_t));
 
  	/** Warning !!! DataPoint Variables Init , Must Within The Data Range **/ 
-    /*
-   		currentDataPoint.valueswitch0 = ;
-   		currentDataPoint.valueswitch1 = ;
-   		currentDataPoint.valueswitch2 = ;
-   		currentDataPoint.valueswitch3 = ;
-    */
+    
+    currentDataPoint.valueswitch0 = false;
+    currentDataPoint.valueswitch1 = false;
+    currentDataPoint.valueswitch2 = false;
+    currentDataPoint.valueswitch3 = false;
+    currentDataPoint.valuecurrent = 0;
+    currentDataPoint.valuevoltage = 0;
+    currentDataPoint.valuepower = 0;
+    
 }
 
 

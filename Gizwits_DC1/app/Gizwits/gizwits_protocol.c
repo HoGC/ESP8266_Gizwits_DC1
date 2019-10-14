@@ -172,6 +172,30 @@ static int8_t ICACHE_FLASH_ATTR gizCheckReport(dataPoint_t *cur, dataPoint_t *la
         ret = 1;
     }
 
+    if(last->valuecurrent != cur->valuecurrent)
+    {
+        if(currentTime - lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valuecurrent Changed\n");
+            ret = 1;
+        }
+    }
+    if(last->valuevoltage != cur->valuevoltage)
+    {
+        if(currentTime - lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valuevoltage Changed\n");
+            ret = 1;
+        }
+    }
+    if(last->valuepower != cur->valuepower)
+    {
+        if(currentTime - lastReportTime >= REPORT_TIME_MAX)
+        {
+            GIZWITS_LOG("valuepower Changed\n");
+            ret = 1;
+        }
+    }
 
     if(1 == ret)
     {
@@ -204,7 +228,10 @@ static int8_t ICACHE_FLASH_ATTR gizDataPoints2ReportData(dataPoint_t *dataPoints
     gizStandardCompressValue(switch3_BYTEOFFSET,switch3_BITOFFSET,switch3_LEN,(uint8_t *)devStatusPtr,dataPoints->valueswitch3);
     gizByteOrderExchange((uint8_t *)devStatusPtr->wBitBuf,sizeof(devStatusPtr->wBitBuf));
 
+    devStatusPtr->valuecurrent = gizY2XFloat(current_RATIO,  current_ADDITION, dataPoints->valuecurrent); 
 
+    devStatusPtr->valuevoltage = exchangeBytes(gizY2XFloat(voltage_RATIO,  voltage_ADDITION, dataPoints->valuevoltage));     
+    devStatusPtr->valuepower = exchangeBytes(gizY2XFloat(power_RATIO,  power_ADDITION, dataPoints->valuepower));     
 
 
 

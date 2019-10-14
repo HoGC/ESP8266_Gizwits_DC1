@@ -1,4 +1,7 @@
-.output/eagle/debug/obj/data.o .output/eagle/debug/obj/data.d : data.c ../../include/c_types.h ../../include/osapi.h \
+.output/eagle/debug/obj/dc1.o .output/eagle/debug/obj/dc1.d : dc1.c ../../include/os_type.h ../../include/ets_sys.h \
+ ../../include/c_types.h ../../include/eagle_soc.h \
+ ../include/driver/dc1.h ../../include/c_types.h ../../include/ets_sys.h \
+ ../../include/osapi.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/string.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/_ansi.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/newlib.h \
@@ -15,4 +18,5 @@
  /opt/xtensa-lx106-elf/lib/gcc/xtensa-lx106-elf/4.8.2/include/stddef.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/cdefs.h \
  /opt/xtensa-lx106-elf/xtensa-lx106-elf/include/sys/string.h \
- ../include/user_config.h ../include/driver/data.h
+ ../include/user_config.h ../../include/gpio.h \
+ ../include/driver/i2c_master.h

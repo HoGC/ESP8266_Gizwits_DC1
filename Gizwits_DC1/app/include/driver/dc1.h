@@ -1,5 +1,9 @@
-#ifndef _DC1_SWITCH_H_
-#define	_DC1_SWITCH_H_
+/*
+ * dc1 driver
+ * Author: HoGC 
+ */
+#ifndef _DC1_H_
+#define	_DC1_H_
 
 #include "c_types.h"
 #include "ets_sys.h"
@@ -27,8 +31,10 @@ void ICACHE_FLASH_ATTR dc1_init(dc1_skey_function k0shortpress, dc1_lkey_functio
 void ICACHE_FLASH_ATTR reverse_switch(uint16_t switch_ret,uint8_t num);
 u8 ICACHE_FLASH_ATTR set_switch(uint8_t num, bool bit_value);
 
-void ICACHE_FLASH_ATTR wifi_led_switch(bool bit_value);
+void dc1_uart_data_handler(u8* data,u16 data_len);
+void ICACHE_FLASH_ATTR get_electric_data(uint16_t *recv_data);
 
+void ICACHE_FLASH_ATTR wifi_led_switch(bool bit_value);
 void ICACHE_FLASH_ATTR logo_led_switch(bool bit_value);
 
 #endif

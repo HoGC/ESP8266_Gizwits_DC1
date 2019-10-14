@@ -16,6 +16,10 @@
 #ifndef _GIZWITS_PRODUCT_H_
 #define _GIZWITS_PRODUCT_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "gizwits_protocol.h"
 
 /**
@@ -56,5 +60,9 @@ void userHandle(void);
 
 /** User zone event handling */
 int8_t gizwitsEventProcess(eventInfo_t * info, uint8_t * data, uint32_t len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

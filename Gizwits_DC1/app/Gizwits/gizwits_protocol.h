@@ -38,12 +38,12 @@
 /**@name Product Key (Product identification code)
 * @{
 */
-#define PRODUCT_KEY "You Product Key"
+#define PRODUCT_KEY "Your Product Key"
 /**@} */
 /**@name Product Secret (Product key)
 * @{
 */
-#define PRODUCT_SECRET "You Product Secret"
+#define PRODUCT_SECRET "Your Product Secret"
 
 #define MAC_LEN_8266                  6
 #define BUFFER_LEN_MAX                900
@@ -100,6 +100,18 @@
 #define switch3_BITOFFSET                     3
 #define switch3_LEN                           1
 
+#define current_RATIO                         0.1
+#define current_ADDITION                      0
+#define current_MIN                           0
+#define current_MAX                           200
+#define voltage_RATIO                         0.1
+#define voltage_ADDITION                      0
+#define voltage_MIN                           0
+#define voltage_MAX                           3800
+#define power_RATIO                         0.1
+#define power_ADDITION                      0
+#define power_MIN                           0
+#define power_MAX                           50000
 /**@} */
 
 /** Writable data points Boolean and enumerated variables occupy byte size */
@@ -201,6 +213,9 @@ typedef struct {
   bool valueswitch1;
   bool valueswitch2;
   bool valueswitch3;
+  float valuecurrent;
+  float valuevoltage;
+  float valuepower;
 } dataPoint_t;
 
 
@@ -229,6 +244,9 @@ typedef struct {
 
 typedef struct {
   uint8_t wBitBuf[COUNT_W_BIT];
+  uint8_t valuecurrent;
+  uint16_t valuevoltage;
+  uint16_t valuepower;
 } devStatus_t; 
 
 /** Wifi signal strength numerical structure */

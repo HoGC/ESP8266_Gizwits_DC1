@@ -30,5 +30,4 @@
  ../../include/spi_flash.h ../../include/gpio.h \
  ../include/user_webserver.h ../..//app/Utils/common.h \
  ../../include/c_types.h ../../include/ets_sys.h ../../include/os_type.h \
- ../../include/mem.h ../include/driver/dc1_switch.h ../../include/gpio.h \
- ../include/driver/ota.h ../../include/upgrade.h
+ ../../include/mem.h ../include/driver/dc1.h ../../include/gpio.h
