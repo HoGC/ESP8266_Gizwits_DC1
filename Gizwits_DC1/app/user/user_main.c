@@ -10,7 +10,6 @@
 #include "user_webserver.h"
 #include "gizwits_product.h"
 #include "driver/uart.h"
-#include "driver/wifi.h"
 #include "driver/dc1.h"
 #if ESP_PLATFORM
 #include "user_esp_platform.h"
@@ -37,22 +36,20 @@ unsigned int default_private_key_len = 0;
 #define INFO( format, ... )
 #endif
 
-bool smartconfig_mode = false;
+//最大存储WIFI信息个数
+#define AP_INFO_MAX		2
+
+bool airlink_flag = false;
+bool connect_flag = false;
+
 os_timer_t OS_Timer_LED;
-os_timer_t OS_Timer_AIRLINK;
+os_timer_t OS_Timer_WifiCheck;
 
 //WIFI信号灯闪动
 void ICACHE_FLASH_ATTR led_flash(void){
     static bool status=0;
     wifi_led_switch(status);
     status=~status;
-}
-
-//配网超时、停止配网模式
-void ICACHE_FLASH_ATTR stop_airlink(void){
-	smartconfig_mode = false;
-	gizwitsSetMode(WIFI_RESET_MODE);
-	os_timer_arm(&OS_Timer_LED, 500, 1);
 }
 
 //总开关短按回调
@@ -74,12 +71,12 @@ void ICACHE_FLASH_ATTR key0_short(bool status){
 //总开关长按回调
 void ICACHE_FLASH_ATTR key0_long(void){
     INFO("key0LongPress\n");
-	smartconfig_mode = true;
+    
+    airlink_flag = true;
+
     os_timer_arm(&OS_Timer_LED, 100, 1);
     gizwitsSetMode(WIFI_AIRLINK_MODE);
-	os_timer_disarm(&OS_Timer_AIRLINK);
-    os_timer_setfn(&OS_Timer_AIRLINK, (os_timer_func_t *)stop_airlink, NULL);
-    os_timer_arm(&OS_Timer_AIRLINK, 60000, 0);
+    
 }
 
 //开关1短按回调
@@ -118,13 +115,11 @@ void ICACHE_FLASH_ATTR key3_short(bool status){
     }
 }
 
-
 //WIFI连接回调
 void wifi_connect_cb(void){
 	INFO("wifi connect!\r\n");
-	if(smartconfig_mode){
-		smartconfig_mode = false;
-		os_timer_disarm(&OS_Timer_AIRLINK);
+	if(airlink_flag){
+		airlink_flag = false;
 	}
 	os_timer_disarm(&OS_Timer_LED);
 	wifi_led_switch(1);
@@ -133,8 +128,47 @@ void wifi_connect_cb(void){
 //WIFI断开回调
 void wifi_disconnect_cb(void){
 	INFO("wifi disconnect!\r\n");
-	if(smartconfig_mode != true){
+	if(airlink_flag != true){
 		os_timer_arm(&OS_Timer_LED, 500, 1);
+	}
+}
+
+
+//WIFI连接状态检查
+void ICACHE_FLASH_ATTR wifi_check(void) {
+	uint8 getState;
+	LOCAL uint8 count = 0;
+	LOCAL uint8 ap_id = 0;
+	struct ip_info ipConfig;
+	if (airlink_flag != true) {
+		wifi_get_ip_info(STATION_IF, &ipConfig);
+		getState = wifi_station_get_connect_status();
+		if (getState == STATION_GOT_IP && ipConfig.ip.addr != 0) {
+			if (connect_flag == 0) {
+				count = 0;
+				connect_flag = 1;
+                airlink_flag = false;
+				INFO("wifi connect!\r\n");
+				os_timer_arm(&OS_Timer_WifiCheck, 1000, 1);
+				wifi_connect_cb();
+			}
+		} else {
+			count++;
+			if (count > 10) {
+				count = 0;
+				ap_id = wifi_station_get_current_ap_id();
+				ap_id = ++ap_id % AP_INFO_MAX;
+				INFO("AP_ID : %d", ap_id);
+				wifi_station_ap_change(ap_id);
+			}
+			if(connect_flag == 1){
+				connect_flag = 0;
+				INFO("wifi disconnect!\r\n");
+				os_timer_arm(&OS_Timer_WifiCheck, 500, 1);
+				wifi_disconnect_cb();
+			}
+
+		}
 	}
 }
 
@@ -162,6 +196,7 @@ void ICACHE_FLASH_ATTR user_init(void)
 {
     uint32_t system_free_size = 0;
 
+    wifi_station_ap_number_set(AP_INFO_MAX);
     wifi_station_set_auto_connect(1);
     wifi_set_sleep_type(NONE_SLEEP_T);//set none sleep mode
     espconn_tcp_set_max_con(10);
@@ -175,11 +210,13 @@ void ICACHE_FLASH_ATTR user_init(void)
 
     gizwitsInit();  
 
-    set_wifistate_cb(wifi_connect_cb, wifi_disconnect_cb);
-
 	dc1_init(key0_short,key0_long,key1_short,NULL,key2_short,NULL,key3_short,NULL);
 
     os_timer_disarm(&OS_Timer_LED);
     os_timer_setfn(&OS_Timer_LED, (os_timer_func_t *)led_flash, NULL);
     os_timer_arm(&OS_Timer_LED, 500, 1);
+    
+	os_timer_disarm(&OS_Timer_WifiCheck);	
+	os_timer_setfn(&OS_Timer_WifiCheck, (os_timer_func_t *) wifi_check, NULL);
+	os_timer_arm(&OS_Timer_WifiCheck, 500, 1); 
 }
