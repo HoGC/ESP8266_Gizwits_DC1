@@ -27,7 +27,7 @@
     * 芯片型号带B为8Mbit  `SPI_SIZE_MAP?=2`
     * 芯片型号不带B为16Mbit  `SPI_SIZE_MAP?=5`
     * <img src="./image/型号图.jpg"  height="210" width="200"> 
-6. 拆解DC1排插取出控制板
+6. [拆解DC1排插](https://github.com/HoGC/phicomm_dc1-esphome/tree/master/cookbook)取出控制板
 7. [编译下载](https://wiki.ai-thinker.com/esp8266)
     * 使用USB转TTL下载
     * 下载前请先拉低IO0(按下白色按键)
