@@ -46,3 +46,6 @@
 8. WIFI信号灯常亮即成功连接WIFI 
 7. 长按总开关进入配网模式，用于重新配网
 8. 每次配网自动保存，可共存两个WIFI信息
+
+### 其他平台
+* [通用MQTT平台](https://github.com/HoGC/ESP8266_MQTT_DC1)
